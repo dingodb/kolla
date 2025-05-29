@@ -24,7 +24,6 @@ UNBUILDABLE_IMAGES = {
     # Issues for SHA1 keys:
     # https://github.com/grafana/grafana/issues/41036
     'centos': {
-        "bifrost-base",          # Using missing branch instead of EOL tag
         "hacluster-pcs",         # Missing crmsh package
         "nova-spicehtml5proxy",  # Missing spicehtml5 package
         "ovsdpdk",               # Not supported on CentOS
@@ -32,22 +31,19 @@ UNBUILDABLE_IMAGES = {
     },
 
     'debian': {
-        "bifrost-base",          # Using missing branch instead of EOL tag
         "openvswitch-netcontrold",
         # https://bugs.launchpad.net/kolla/+bug/2027668
     },
 
     'rocky': {
-        "bifrost-base",          # Using missing branch instead of EOL tag
         "collectd",              # Missing libpqos.so.4()(64bit)
         "hacluster-pcs",         # Missing crmsh package
         "nova-spicehtml5proxy",  # Missing spicehtml5 package
-        "ovsdpdk",               # Not supported on CentOS
+#        "ovsdpdk",               # Not supported on CentOS
         "tgtd",                  # Not supported on CentOS
     },
 
     'ubuntu': {
-        "bifrost-base",          # Using missing branch instead of EOL tag
     },
 
     'ubuntu+aarch64': {
