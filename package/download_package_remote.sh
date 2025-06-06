@@ -10,6 +10,7 @@ package_list=(
   "$tarballs_base/networking-sfc/networking-sfc-${openstack_branch}.tar.gz"
   "$tarballs_base/neutron-vpnaas/neutron-vpnaas-${openstack_branch}.tar.gz"
   "$tarballs_base/neutron-dynamic-routing/neutron-dynamic-routing-${openstack_branch}.tar.gz"
+  "$tarballs_base/requirements/requirements-${openstack_branch}.tar.gz"
 )
 
 for package in "${package_list[@]}"; do

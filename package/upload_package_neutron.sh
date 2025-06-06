@@ -12,6 +12,7 @@ package_list=(
    "networking-sfc-stable-2023.2.tar.gz"
    "networking-baremetal-stable-2023.2.tar.gz"
    "neutron-stable-2023.2.tar.gz"
+   "requirements-stable-2023.2.tar.gz"
 )
 
 for package in "${package_list[@]}"; do
