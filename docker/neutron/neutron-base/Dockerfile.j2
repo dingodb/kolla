@@ -26,7 +26,8 @@ LABEL maintainer="{{ maintainer }}" name="{{ image_name }}" build-date="{{ build
         'openvswitch',
         'python3-openvswitch',
         'radvd',
-        'uuid'
+        'uuid',
+        'tcpdump'
     ] %}
 
 {% elif base_package_type == 'deb' %}
@@ -46,7 +47,8 @@ LABEL maintainer="{{ maintainer }}" name="{{ image_name }}" build-date="{{ build
         'openvswitch-switch',
         'python3-openvswitch',
         'radvd',
-        'uuid-runtime'
+        'uuid-runtime',
+        'tcpdump'
     ] %}
 
 {% endif %}
