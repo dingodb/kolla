@@ -124,6 +124,10 @@ SOURCES = {
         'type': 'url',
         'location': ('$tarballs_base/openstack/neutron-vpnaas-dashboard/'
                      'neutron-vpnaas-dashboard-${openstack_branch}.tar.gz')},
+    'horizon-plugin-neutron-fwaas-dashboard': {
+        'type': 'url',
+        'location': ('$tarballs_base/openstack/neutron-fwaas-dashboard/'
+                     'neutron-fwaas-dashboard-${openstack_branch}.tar.gz')},
     'horizon-plugin-octavia-dashboard': {
         'type': 'url',
         'location': ('$tarballs_base/openstack/octavia-dashboard/'

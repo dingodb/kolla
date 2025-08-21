@@ -85,6 +85,7 @@ kolla_build_sources:
   openstack/monasca-ui: horizon-plugin-monasca-ui
   openstack/murano-dashboard: horizon-plugin-murano-dashboard
   openstack/neutron-vpnaas-dashboard: horizon-plugin-neutron-vpnaas-dashboard
+  openstack/neutron-fwaas-dashboard: horizon-plugin-neutron-fwaas-dashboard
   openstack/octavia-dashboard: horizon-plugin-octavia-dashboard
   openstack/sahara-dashboard: horizon-plugin-sahara-dashboard
   openstack/senlin-dashboard: horizon-plugin-senlin-dashboard

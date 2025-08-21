@@ -164,6 +164,14 @@ function config_neutron_vpnaas_dashboard {
         "${SITE_PACKAGES}/openstack_dashboard/local/enabled/_7100_project_vpn_panel.py"
 }
 
+function config_neutron_fwaas_dashboard {
+    for file in ${SITE_PACKAGES}/neutron_fwaas_dashboard/enabled/_*[^__].py; do
+        config_dashboard "${ENABLE_NEUTRON_FWAAS:-no}" \
+            "${SITE_PACKAGES}/neutron_fwaas_dashboard/enabled/${file##*/}" \
+            "${SITE_PACKAGES}/openstack_dashboard/local/enabled/${file##*/}"
+    done
+}
+
 function config_octavia_dashboard {
     config_dashboard "${ENABLE_OCTAVIA:-no}" \
         "${SITE_PACKAGES}/octavia_dashboard/enabled/_1482_project_load_balancer_panel.py" \
@@ -284,6 +292,7 @@ config_masakari_dashboard
 config_mistral_dashboard
 config_murano_dashboard
 config_neutron_vpnaas_dashboard
+config_neutron_fwaas_dashboard
 config_octavia_dashboard
 config_sahara_dashboard
 config_senlin_dashboard
