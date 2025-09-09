@@ -1,80 +1,140 @@
 {% extends parent_template %}
 
 {% block ovsdpdk_install %}
-
+#FROM quay.io/rockylinux/rockylinux:9 as builder
 # install ovs from source
-
+#FROM rockylinux:9
+#ENV TERM=xterm
 {% if base_package_type == 'rpm' %}
     {% set ovs_dpdk_packages = [
-        'kernel-devel-$(uname -r)',
-        'redhat-lsb-core',
-        'pciutils',
-        'autoconf',
-        'libtool',
-        'fuse-devel',
-        'gcc',
+       'epel-release',
+       'gcc',
         'make',
-        'autoconf',
-        'automake',
-        'libpcap-devel',
+        'kernel-devel',
+        'kernel-headers',
+        'libtool',
+        'libmnl',
+        'numactl-devel',
+        'pciutils-devel',
         'python3-devel',
-        'python3-six',
-        'crudini'
+        'python3-pip',
+        'git',
+        'diffutils',
+       'ethtool',
+       'crudini'
+
      ] %}
 
-{% elif base_package_type == 'deb' %}
-
-    {% set ovs_dpdk_packages = [
-        'linux-headers-$(uname -r)',
-        'fdutils',
-        'libxtst6',
-        'libnuma-dev',
-        'autoconf',
-        'automake',
-        'libtool',
-        'libfuse-dev',
-        'gcc',
-        'make',
-        'build-essential',
-        'libpcap-dev',
-        'python3-dev',
-        'python3-six',
-        'crudini'
-    ] %}
-
 {% endif %}
 
-{{ macros.install_packages(ovs_dpdk_packages | customizable("packages")) }}
-
-{% if base_package_type == 'rpm' %}
+{{ macros.install_packages(ovs_dpdk_packages | customizable("packages"),clean=True) }}
+RUN python3 -m pip install --no-cache-dir  meson  ninja pyelftools -i https://pypi.tuna.tsinghua.edu.cn/simple  
+#RUN dnf install perl tk tcl lsof  libnl3 tcsh rpm-build pciutils createrepo gcc-gfortran fuse-libs   libnl3-devel ethtool -y 
+#RUN dnf install -y \
+#    kernel-devel  \
+#    kernel-headers
 RUN mkdir -p /lib/modules/$(uname -r) \
     && ln -s /usr/src/kernels/$(uname -r) /lib/modules/$(uname -r)/build
-{% endif %}
-
 ADD plugins-archive /
-RUN ln -s /plugins/ovsdpdk-plugin-ovs-archive-*/ /ovs \
-    && ln -s /plugins/ovsdpdk-plugin-dpdk-archive-*/ /dpdk
+RUN ln -s /plugins/ovs/ /ovs \
+    && ln -s /plugins/dpdk/ /dpdk 
+ #   && ln -s /plugins/mlnx-en-24.10-2.1.8.0-rhel9.4-x86_64  /MLNX
+RUN ls -al /lib64/
+RUN cp -ar /plugins/mlx-ofe-so/* /lib64/
+RUN ls -al /lib64/
+WORKDIR /lib64
+RUN ldd libmlx5.so
+RUN ldd libnl-3.so.200
+RUN ldd libibverbs.so.1
+RUN ldd libnl-route-3.so.200
+RUN mkdir /usr/include/infiniband
+RUN cp -ar /plugins/infiniband/* /usr/include/infiniband/
+RUN ls -al /usr/include/infiniband/
+RUN ls -al /dpdk/
+RUN ls -al /ovs/
+#WORKDIR /MLNX
+#RUN dnf install perl tk tcl lsof  libnl3 \
+#    tcsh rpm-build pciutils  createrepo gcc-gfortran fuse-libs  libnl3-devel -y 
+#RUN  ./mlnxofedinstall --force   --dpdk --skip-repo  --distro rhel9.4 --add-kernel-support --kmp --without-fw-update 
+#RUN ./mlnxofedinstall --skip-distro-check 
+#RUN ./install --distro rhel9.4 --add-kernel-support
 WORKDIR /dpdk
-{% set RTE_TARGET='x86_64-native-linuxapp-gcc' %}
-RUN make config T="{{ RTE_TARGET }}"
-WORKDIR "/dpdk/build"
+RUN if [ -f configure ]; then \
+        make config T=x86_64-native-linuxapp-gcc && \
+        make -j $(nproc); \
+    else \
+        meson  build && \
+        ninja -C build &&  \
+        ninja -C build install && \
+        rm -rf /dpdk/build/meson-private; \
+    fi
 
-{{ macros.sed( file="/dpdk/build/.config",
-               expressions=["s/CONFIG_RTE_BUILD_COMBINE_LIBS=n/CONFIG_RTE_BUILD_COMBINE_LIBS=y/",
-                           "s/CONFIG_RTE_MAX_MEMSEG=.*$/CONFIG_RTE_MAX_MEMSEG=1024/",
-                           "s/CONFIG_RTE_LIBRTE_VHOST=.*$/CONFIG_RTE_LIBRTE_VHOST=y/",
-                           "s/CONFIG_RTE_LIBRTE_KNI=.*$/CONFIG_RTE_LIBRTE_KNI=n/",
-                           "s/CONFIG_RTE_KNI_KMOD=.*$/CONFIG_RTE_KNI_KMOD=n/",
-                           "s/CONFIG_RTE_EAL_IGB_UIO=.*$/CONFIG_RTE_EAL_IGB_UIO=y/",
-                           "s/CONFIG_RTE_BUILD_SHARED_LIB=.*$/CONFIG_RTE_BUILD_SHARED_LIB=n/"])
-}}
-
-RUN make -j $(nproc) EXTRA_CFLAGS='-O2 -fPIC' \
-    && make install
+ENV PKG_CONFIG_PATH=/usr/local/lib64/pkgconfig \
+    LD_LIBRARY_PATH=/usr/local/lib64:$LD_LIBRARY_PATH
 WORKDIR /ovs
-RUN ./boot.sh \
-    && ./configure --with-dpdk="/dpdk/build" --prefix=/usr --with-dbdir=/etc/openvswitch --with-rundir=/run/openvswitch \
-    && make -j $(nproc) CFLAGS='-O2 -fPIC' \
-    && make install
+RUN ./boot.sh && \
+ #   mkdir -p .ci .github/workflows .github/ISSUE_TEMPLATE  && \
+ #   find .ci/ -type f -name "*.sh" -delete && \
+ #   for script in \
+ #       dpdk-prepare.sh dpdk-build.sh \
+ #       linux-prepare.sh linux-build.sh \
+ #       osx-prepare.sh osx-build.sh \
+ #       windows-prepare.sh windows-build.sh \
+ #       common-prepare.sh common-build.sh \
+ #       azure-prepare.sh azure-build.sh \
+ #       travis-prepare.sh travis-build.sh \
+ #       github-prepare.sh github-build.sh; \
+ #   do \
+ #       echo '#!/bin/sh' > .ci/${script}; \
+ #       echo 'echo "Skipping ${script} (dummy implementation)"' >> .ci/${script}; \
+ #       echo 'exit 0' >> .ci/${script}; \
+ #       chmod +x .ci/${script}; \
+ #   done && \
+ #   touch \
+ #       .cirrus.yml \
+ #       .travis.yml \
+ #       .editorconfig \
+ #       .gitattributes \
+ #       .gitignore \
+ #       .mailmap \
+ #       .clang-format \
+ #       azure-pipelines.yml \
+ #       AUTHORS.rst \
+ #       ChangeLog.rst \
+ #       CODING_STYLE.rst \
+ #       CONTRIBUTING.rst \
+ #       README.rst  \
+ #       .readthedocs.yaml \
+ #       .github/workflows/build-and-test.yml \
+ #       .github/workflows/ci.yml \
+ #       .github/ISSUE_TEMPLATE/bug_report.md \
+ #       .github/ISSUE_TEMPLATE/feature_request.md \
+     ./configure --with-dpdk=static --prefix=/usr --with-dbdir=/etc/openvswitch --with-rundir=/run/openvswitch \
+    && make -j4  CFLAGS='-O2 -fPIC' \
+    && make install \
+    && rm -rf /ovs/build-aux /ovs/.git
+
+
+#FROM rockylinux:9-minimal
+#FROM registry.aliyuncs.com/rockylinux/rockylinux:9-minimal
+#FROM quay.io/rockylinux/rockylinux:9-minimal
+#RUN microdnf install -y --nodocs \
+#    numactl libmnl python3-libs \
+#    && microdnf clean all
+
+#COPY --from=builder /usr/local/ovs /usr/local/
+#COPY --from=builder /usr/local/lib64/libdpdk.so.* /usr/local/lib64/
+#COPY --from=builder /usr/sbin/ovs-vswitchd /usr/sbin/
+#COPY --from=builder /usr/sbin/ovsdb-server /usr/sbin/
+#COPY --from=builder /usr/lib/libopenvswitch.so* /usr/lib/
+#COPY --from=builder /usr/share/openvswitch /usr/share/openvswitch
+
+#jiRUN find /usr/local -name '*.a' -delete \
+  #  && find /usr/local -name '*.la' -delete \
+  #  && strip /usr/local/ovs/bin/* /usr/local/ovs/sbin/*
+
+#ENV PATH=/usr/local/ovs/bin:$PATH \
+#    LD_LIBRARY_PATH=/usr/local/ovs/lib:/usr/local/lib64
+
 
 {% endblock %}

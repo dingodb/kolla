@@ -27,7 +27,8 @@ LABEL maintainer="{{ maintainer }}" name="{{ image_name }}" build-date="{{ build
         'openvswitch',
         'python3-openvswitch',
         'radvd',
-        'uuid'
+        'uuid',
+        'tcpdump'
     ] %}
 
 {% elif base_package_type == 'deb' %}
@@ -48,7 +49,8 @@ LABEL maintainer="{{ maintainer }}" name="{{ image_name }}" build-date="{{ build
         'openvswitch-switch',
         'python3-openvswitch',
         'radvd',
-        'uuid-runtime'
+        'uuid-runtime',
+        'tcpdump'
     ] %}
 
 {% endif %}
@@ -61,7 +63,9 @@ ADD plugins-archive /
 {% set neutron_base_pip_packages = [
     '/neutron',
     'oslo-vmware',
-    'tap-as-a-service'
+    'tap-as-a-service',
+    'neutron-fwaas',
+    'networking-mlnx'
 ] %}
 
 {% set neutron_base_plugins_pip_packages = [

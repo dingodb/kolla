@@ -37,7 +37,7 @@ UNBUILDABLE_IMAGES = {
         "collectd",              # Missing libpqos.so.4()(64bit)
         "hacluster-pcs",         # Missing crmsh package
         "nova-spicehtml5proxy",  # Missing spicehtml5 package
-        "ovsdpdk",               # Not supported on CentOS
+#        "ovsdpdk",               # Not supported on CentOS
         "tgtd",                  # Not supported on CentOS
     },
 
