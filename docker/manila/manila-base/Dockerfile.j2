@@ -12,7 +12,7 @@ LABEL maintainer="{{ maintainer }}" name="{{ image_name }}" build-date="{{ build
 
 {% if base_package_type == 'rpm' %}
 
-    {% set manila_base_packages = ['openvswitch'] %}
+    {% set manila_base_packages = ['openvswitch','centos-release-nfs-ganesha5'] %}
 
 {% elif base_package_type == 'deb' %}
 
