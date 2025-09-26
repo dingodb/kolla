@@ -39,7 +39,7 @@ LABEL maintainer="{{ maintainer }}" name="{{ image_name }}" build-date="{{ build
 
 COPY extend_start.sh /usr/local/bin/kolla_manila_extend_start
 
-RUN chmod 644 /usr/local/bin/kolla_manila_extend_start && chmod 755 /usr/bin/ganesha.nfsd
+RUN chmod 644 /usr/local/bin/kolla_manila_extend_start && mkdir -p /var/run/ganesha && chmod 755 /usr/bin/ganesha.nfsd &&  echo "manila ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 {% block manila_share_footer %}{% endblock %}
 {% block footer %}{% endblock %}
